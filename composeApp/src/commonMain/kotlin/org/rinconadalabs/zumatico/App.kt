@@ -15,17 +15,16 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 @Preview
 fun App() {
-    var formula = mutableListOf(Quantity(), Quantity())
-    var targets = mutableListOf<Rect?>()
-    var fruits = mutableListOf(Fruit(targets), Fruit(targets))
+    val formula = Formula()
+    val basket = Basket(formula.targets, { index, fruit -> formula.onAdded(index, fruit) }, { index, fruit -> formula.onRemoved(index, fruit) })
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Gray)
     ) {
-        Row { formula.forEach { term -> targets.add(term.draw()) } }
-        fruits.forEach { fruit -> fruit.draw() }
+        formula.Draw()
+        basket.Draw()
     }
 
 

@@ -24,11 +24,11 @@ import org.jetbrains.compose.resources.painterResource
 import zumatico.composeapp.generated.resources.Res
 import zumatico.composeapp.generated.resources.apple
 import kotlin.math.roundToInt
-import kotlin.plus
 
-class Fruit(val targets: MutableList<Rect?>, num: Int = 0) : DrawableDraggable {
+class Fruit(val targets: MutableList<Rect?>, val onOutOfBasket: (Int, Fruit) -> Unit, val onRemoved: (Int, Fruit) -> Unit) : DrawableDraggable {
+    var addedTo = -1
     @Composable
-    override fun draw() {
+    override fun Draw() {
         var position by remember { mutableStateOf(Offset.Zero) }
         val dragAnimation by animateOffsetAsState(targetValue = position, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
         var size by remember { mutableStateOf(IntSize.Zero) }
@@ -36,8 +36,10 @@ class Fruit(val targets: MutableList<Rect?>, num: Int = 0) : DrawableDraggable {
 
         fun snapToTarget() {
             isDragging = false
-            var targetHit : Rect? = null
-            targets.forEach { target ->
+            var targetHit = -1
+            println(targets)
+            targets.forEachIndexed { index, target ->
+                println(index)
                 target?.let { targetBounds ->
                     val draggableRect = Rect(
                         offset = position,
@@ -48,16 +50,22 @@ class Fruit(val targets: MutableList<Rect?>, num: Int = 0) : DrawableDraggable {
                     )
                     println("fruit $draggableRect target $targetBounds")
                     if (draggableRect.overlaps(targetBounds)) {
-                        targetHit = targetBounds
+                        targetHit = index
                     }
                 }
             }
-            targetHit?.let {
-                val targetCenter = it.center
+            if (targetHit >= 0) {
+                val targetCenter = targets[targetHit]!!.center
                 val snapX = targetCenter.x - size.width / 2f
                 val snapY = targetCenter.y - size.height / 2f
                 position = Offset(snapX, snapY)
-            } ?: run {
+                addedTo = targetHit
+                onOutOfBasket(targetHit, this)
+            } else {
+                if (addedTo >= 0) {
+                    onRemoved(addedTo, this)
+                    addedTo = -1
+                }
                 position = Offset.Zero
             }
         }
