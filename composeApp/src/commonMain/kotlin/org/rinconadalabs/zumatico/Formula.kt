@@ -19,7 +19,6 @@ class Formula () {
     fun fruitDragged(fruit: Fruit, bounds: Rect) {
         terms.forEachIndexed { index, term ->
             term.bounds?.let { targetBounds ->
-                println("fruit $bounds target $targetBounds")
                 if (bounds.overlaps(targetBounds)) {
                     val snapX = term.bounds!!.center.x - bounds.size.width / 2f
                     val snapY = term.bounds!!.center.y - bounds.size.height / 2f
@@ -35,15 +34,11 @@ class Formula () {
 
     fun onAdded(quantity: Quantity, fruit: Fruit) {
         quantity.add(fruit)
-        fruits.remove(fruit)
-        println("1 fruits on add ${fruits.size}")
         fruits.add(Fruit({ fruit, bounds -> fruitDragged(fruit, bounds) }))
-        println("2 fruits on add ${fruits.size}")
     }
 
     fun onRemoved(fruit: Fruit) {
         terms.forEach { quantity -> quantity.remove(fruit) }
-        println("fruits on remove ${fruits.size}")
     }
 
     var fruits = mutableStateSetOf(Fruit({ fruit, bounds -> fruitDragged(fruit, bounds) }))
@@ -56,8 +51,8 @@ class Formula () {
                 .fillMaxSize()
                 .background(Color.Gray)
         ) {
-            Row(modifier = Modifier.align(Alignment.Center)) { terms.forEach { term -> term.draw() } }
-            Box { fruits.forEach { fruit -> fruit.Draw() } }
+            Row(modifier = Modifier.align(Alignment.Center)) { terms.forEach { term -> term.Draw() } }
+            Row { fruits.forEach { fruit -> fruit.Draw() } }
         }
     }
 }

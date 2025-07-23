@@ -25,20 +25,20 @@ import zumatico.composeapp.generated.resources.Res
 import zumatico.composeapp.generated.resources.apple
 import kotlin.math.roundToInt
 
-class Fruit(val dragStopped: (Fruit, Rect) -> Unit) : DrawableDraggable {
+class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
     private var position by mutableStateOf(Offset.Zero)
 
     fun backToBasket() {
         position = Offset.Zero
     }
 
-    fun goTo(position: Offset) {
-        this.position = position
+    fun goTo(spot: Offset) {
+        position = spot
     }
 
     @Composable
-    override fun Draw() {
-        val dragAnimation by animateOffsetAsState(targetValue = position, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+    fun Draw() {
+        val moveAnimation by animateOffsetAsState(targetValue = position, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
         var size by remember { mutableStateOf(IntSize.Zero) }
         var isDragging by remember { mutableStateOf(false) }
 
@@ -57,7 +57,7 @@ class Fruit(val dragStopped: (Fruit, Rect) -> Unit) : DrawableDraggable {
             modifier = Modifier
                 //.align(Alignment.BottomStart)
                 .offset {
-                    val offsetToUse = if (isDragging) position else dragAnimation
+                    val offsetToUse = if (isDragging) position else moveAnimation
                     IntOffset(offsetToUse.x.roundToInt(), offsetToUse.y.roundToInt())
                 }
                 .fillMaxSize(fraction = 0.15f)
@@ -68,7 +68,7 @@ class Fruit(val dragStopped: (Fruit, Rect) -> Unit) : DrawableDraggable {
                     detectDragGestures(
                         onDragStart = {
                             isDragging = true
-                            position = dragAnimation
+                            position = moveAnimation
                         },
                         onDragEnd = {
                             onDragEnd()
