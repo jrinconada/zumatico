@@ -1,6 +1,7 @@
 package org.rinconadalabs.zumatico
 
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
@@ -26,19 +27,24 @@ import zumatico.composeapp.generated.resources.apple
 import kotlin.math.roundToInt
 
 class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
+    private val originalScale = 0.15f
     private var position by mutableStateOf(Offset.Zero)
+    private var scale by mutableStateOf(originalScale)
 
     fun backToBasket() {
         position = Offset.Zero
+        scale = originalScale
     }
 
-    fun goTo(spot: Offset) {
-        position = spot
+    fun goTo(position: Offset, scale: Float) {
+        this.position = position
+        this.scale = scale
     }
 
     @Composable
     fun Draw() {
         val moveAnimation by animateOffsetAsState(targetValue = position, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+        val scaleAnimation by animateFloatAsState(targetValue = scale, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
         var size by remember { mutableStateOf(IntSize.Zero) }
         var isDragging by remember { mutableStateOf(false) }
 
@@ -60,7 +66,7 @@ class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
                     val offsetToUse = if (isDragging) position else moveAnimation
                     IntOffset(offsetToUse.x.roundToInt(), offsetToUse.y.roundToInt())
                 }
-                .fillMaxSize(fraction = 0.15f)
+                .fillMaxSize(fraction = scaleAnimation)
                 .onGloballyPositioned { coordinates ->
                     size = coordinates.size
                 }

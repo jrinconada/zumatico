@@ -19,10 +19,10 @@ class Formula () {
     fun fruitDragged(fruit: Fruit, bounds: Rect) {
         terms.forEachIndexed { index, term ->
             term.bounds?.let { targetBounds ->
-                if (bounds.overlaps(targetBounds)) {
+                if (term is Quantity && bounds.overlaps(targetBounds)) {
                     val snapX = term.bounds!!.center.x - bounds.size.width / 2f
                     val snapY = term.bounds!!.center.y - bounds.size.height / 2f
-                    fruit.goTo(Offset(snapX, snapY))
+                    fruit.goTo(Offset(snapX, snapY), 0.1f)
                     onAdded(term, fruit)
                     return
                 }
@@ -35,14 +35,26 @@ class Formula () {
     fun onAdded(quantity: Quantity, fruit: Fruit) {
         quantity.add(fruit)
         fruits.add(Fruit({ fruit, bounds -> fruitDragged(fruit, bounds) }))
+        if (terms.size == 1) addSum()
+    }
+
+    fun addSum() {
+        terms.add(Symbol())
+        terms.add(Quantity())
+        terms.add(Symbol(Symbol.Equal))
+        terms.add(Quantity())
     }
 
     fun onRemoved(fruit: Fruit) {
-        terms.forEach { quantity -> quantity.remove(fruit) }
+        terms.forEach { quantity -> if (quantity is Quantity) quantity.remove(fruit) }
+        if (terms.filterIsInstance<Quantity>().all { it.isEmpty() }) {
+            terms.clear()
+            terms.add(Quantity())
+        }
     }
 
     var fruits = mutableStateSetOf(Fruit({ fruit, bounds -> fruitDragged(fruit, bounds) }))
-    val terms = mutableListOf(Quantity())
+    val terms = mutableStateListOf<Term>(Quantity())
 
     @Composable
     fun Draw() {
@@ -52,7 +64,7 @@ class Formula () {
                 .background(Color.Gray)
         ) {
             Row(modifier = Modifier.align(Alignment.Center)) { terms.forEach { term -> term.Draw() } }
-            Row { fruits.forEach { fruit -> fruit.Draw() } }
+            Box { fruits.forEach { fruit -> fruit.Draw() } }
         }
     }
 }
