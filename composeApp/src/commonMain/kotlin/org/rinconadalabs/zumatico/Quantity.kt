@@ -8,19 +8,17 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import org.jetbrains.compose.resources.painterResource
 import zumatico.composeapp.generated.resources.Res
@@ -39,7 +37,7 @@ class Quantity : Term() {
         println("fruit remove ${fruits.size}")
     }
 
-    var target: Rect? = null
+    var bounds: Rect? = null
 
     @Composable
     override fun draw(): Rect? {
@@ -53,22 +51,18 @@ class Quantity : Term() {
             enter = scaleIn(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)),
             exit = scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)),
             modifier = Modifier
-                //.align(Alignment.Center)
                 .fillMaxSize(fraction = 0.3f)
                 .onGloballyPositioned { coordinates ->
-                    target = coordinates.boundsInParent()
+                    bounds = coordinates.boundsInRoot()
                 }
         ) {
-            Box {
-                Image(
-                    painter = painterResource(Res.drawable.unknown),
-                    contentDescription = "Unknown",
-                    colorFilter = ColorFilter.tint(Color.DarkGray)
-                )
-                Row { fruits.forEach { fruit -> fruit.Draw() } }
-            }
-
+            Image(
+                painter = painterResource(Res.drawable.unknown),
+                contentDescription = "Unknown",
+                colorFilter = ColorFilter.tint(Color.DarkGray)
+            )
+            Column { fruits.forEach { fruit -> fruit.Draw() } }
         }
-        return target
+        return bounds
     }
 }

@@ -25,49 +25,30 @@ import zumatico.composeapp.generated.resources.Res
 import zumatico.composeapp.generated.resources.apple
 import kotlin.math.roundToInt
 
-class Fruit(val targets: MutableList<Rect?>, val onOutOfBasket: (Int, Fruit) -> Unit, val onRemoved: (Int, Fruit) -> Unit) : DrawableDraggable {
-    var addedTo = -1
+class Fruit(val dragStopped: (Fruit, Rect) -> Unit) : DrawableDraggable {
+    private var position by mutableStateOf(Offset.Zero)
+
+    fun backToBasket() {
+        position = Offset.Zero
+    }
+
+    fun goTo(position: Offset) {
+        this.position = position
+    }
+
     @Composable
     override fun Draw() {
-        var position by remember { mutableStateOf(Offset.Zero) }
         val dragAnimation by animateOffsetAsState(targetValue = position, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
         var size by remember { mutableStateOf(IntSize.Zero) }
         var isDragging by remember { mutableStateOf(false) }
 
-        fun snapToTarget() {
+        fun onDragEnd() {
             isDragging = false
-            var targetHit = -1
-            println(targets)
-            targets.forEachIndexed { index, target ->
-                println(index)
-                target?.let { targetBounds ->
-                    val draggableRect = Rect(
-                        offset = position,
-                        size = Size(
-                            size.width.toFloat(),
-                            size.height.toFloat()
-                        )
-                    )
-                    println("fruit $draggableRect target $targetBounds")
-                    if (draggableRect.overlaps(targetBounds)) {
-                        targetHit = index
-                    }
-                }
-            }
-            if (targetHit >= 0) {
-                val targetCenter = targets[targetHit]!!.center
-                val snapX = targetCenter.x - size.width / 2f
-                val snapY = targetCenter.y - size.height / 2f
-                position = Offset(snapX, snapY)
-                addedTo = targetHit
-                onOutOfBasket(targetHit, this)
-            } else {
-                if (addedTo >= 0) {
-                    onRemoved(addedTo, this)
-                    addedTo = -1
-                }
-                position = Offset.Zero
-            }
+            val bounds = Rect(
+                offset = position,
+                size = Size(size.width.toFloat(), size.height.toFloat())
+            )
+            dragStopped(this, bounds)
         }
 
         Image(
@@ -77,10 +58,7 @@ class Fruit(val targets: MutableList<Rect?>, val onOutOfBasket: (Int, Fruit) -> 
                 //.align(Alignment.BottomStart)
                 .offset {
                     val offsetToUse = if (isDragging) position else dragAnimation
-                    IntOffset(
-                        offsetToUse.x.roundToInt(),
-                        offsetToUse.y.roundToInt()
-                    )
+                    IntOffset(offsetToUse.x.roundToInt(), offsetToUse.y.roundToInt())
                 }
                 .fillMaxSize(fraction = 0.15f)
                 .onGloballyPositioned { coordinates ->
@@ -93,7 +71,7 @@ class Fruit(val targets: MutableList<Rect?>, val onOutOfBasket: (Int, Fruit) -> 
                             position = dragAnimation
                         },
                         onDragEnd = {
-                            snapToTarget()
+                            onDragEnd()
                         },
                         onDrag = { change, dragAmount ->
                             change.consume()
