@@ -2,6 +2,8 @@ package org.rinconadalabs.zumatico
 
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import org.jetbrains.compose.resources.DrawableResource
@@ -14,28 +16,26 @@ class Symbol (which: DrawableResource = Plus) : Term() {
         val Equal = Res.drawable.eq
         val Plus = Res.drawable.plus
     }
-    override var image = which
+    override var image = mutableStateOf(which)
 
     var swipeDirection = 0f
 
-    init {
-        modifier.pointerInput(Unit) {
+    @Composable
+    override fun Draw() {
+        drawing(Modifier.pointerInput(Unit) {
             detectVerticalDragGestures(
                 onDragEnd = {
                     if (swipeDirection < 0) {
-                        println("Swipe up")
-                        image = Equal
+                        image.value = Equal
                     } else {
-                        println("Swipe down")
-                        image = Plus
+                        image.value = Plus
                     }
                 },
                 onVerticalDrag = { change, dragAmount ->
                     change.consume()
-                    println("Swipe up $dragAmount")
                     swipeDirection = dragAmount
                 }
             )
-        }
+        })
     }
 }

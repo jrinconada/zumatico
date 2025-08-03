@@ -1,10 +1,13 @@
 package org.rinconadalabs.zumatico
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
 import zumatico.composeapp.generated.resources.Res
 import zumatico.composeapp.generated.resources.unknown
 
 class Quantity : Term() {
-    override val image = Res.drawable.unknown
+    override val image = mutableStateOf(Res.drawable.unknown)
     private var fruits = mutableSetOf<Fruit>()
     fun add(fruit: Fruit) {
         fruits.add(fruit)
@@ -16,4 +19,9 @@ class Quantity : Term() {
     }
 
     fun isEmpty() = fruits.isEmpty()
+
+    @Composable
+    override fun Draw() {
+        drawing(Modifier)
+    }
 }
