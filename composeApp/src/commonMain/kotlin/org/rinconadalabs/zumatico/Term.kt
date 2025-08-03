@@ -23,7 +23,7 @@ abstract class Term {
     var bounds: Rect? = null
     abstract val image: MutableState<DrawableResource>
 
-    val drawing: @Composable (modifier: Modifier) -> Unit = { modifier ->
+    val drawing: @Composable (modifier: Modifier, image: DrawableResource) -> Unit = { modifier, image ->
         val visible = remember {
             MutableTransitionState(false).apply {
                 targetState = true
@@ -35,7 +35,7 @@ abstract class Term {
             exit = scaleOut(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)),
             ) {
             Image(
-                painter = painterResource(image.value),
+                painter = painterResource(image),
                 contentDescription = null,
                 modifier = modifier.fillMaxSize(fraction = 0.3f)
                     .onGloballyPositioned { coordinates ->

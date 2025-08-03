@@ -22,6 +22,6 @@ class Quantity : Term() {
 
     @Composable
     override fun Draw() {
-        drawing(Modifier)
+        drawing(Modifier, image.value)
     }
 }
