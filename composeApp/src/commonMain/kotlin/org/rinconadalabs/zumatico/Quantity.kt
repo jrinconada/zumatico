@@ -19,11 +19,9 @@ class Quantity : Term() {
     fun add(fruit: Fruit) {
         move(fruit)
         fruits.add(fruit)
-        println("fruit added ${fruits.size}")
     }
     fun remove(fruit: Fruit) {
         fruits.remove(fruit)
-        println("fruit remove ${fruits.size}")
     }
 
     private fun moveFruits() {

@@ -3,6 +3,7 @@ package org.rinconadalabs.zumatico
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
@@ -102,7 +103,8 @@ class Formula () {
                 .fillMaxSize()
                 .background(Color.Gray)
         ) {
-            Row(modifier = Modifier.align(Alignment.Center)) { terms.forEach { term -> term.Draw() } }
+            Row(modifier = Modifier.align(Alignment.Center).fillMaxHeight(fraction = 0.3f)) {
+                terms.forEach { term -> term.Draw() } }
             Box { fruits.forEach { fruit -> fruit.Draw() } }
         }
     }
