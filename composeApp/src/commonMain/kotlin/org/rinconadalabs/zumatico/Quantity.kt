@@ -15,6 +15,8 @@ class Quantity : Term() {
     var bounds: Rect? = null
     override val image = mutableStateOf(Res.drawable.unknown)
     private var fruits = mutableSetOf<Fruit>()
+
+    val count get() = fruits.size
     fun add(fruit: Fruit) {
         move(fruit)
         fruits.add(fruit)

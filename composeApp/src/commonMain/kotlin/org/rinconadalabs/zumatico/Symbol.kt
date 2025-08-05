@@ -24,7 +24,7 @@ import zumatico.composeapp.generated.resources.Res
 import zumatico.composeapp.generated.resources.eq
 import zumatico.composeapp.generated.resources.plus
 
-class Symbol (which: DrawableResource = Plus) : Term() {
+class Symbol (which: DrawableResource, val onSwipe: () -> Unit) : Term() {
     companion object {
         val Equal = Res.drawable.eq
         val Plus = Res.drawable.plus
@@ -54,8 +54,10 @@ class Symbol (which: DrawableResource = Plus) : Term() {
                     onDragEnd = {
                         if (swipeDirection < 0) {
                             image.value = Equal
+                            onSwipe()
                         } else {
                             image.value = Plus
+                            onSwipe()
                         }
                     },
                     onVerticalDrag = { change, dragAmount ->
