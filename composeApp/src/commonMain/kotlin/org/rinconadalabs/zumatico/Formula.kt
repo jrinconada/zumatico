@@ -18,13 +18,12 @@ class Formula () {
 
     fun fruitDragged(fruit: Fruit, bounds: Rect) {
         terms.forEachIndexed { index, term ->
-            term.bounds?.let { targetBounds ->
-                if (term is Quantity && bounds.overlaps(targetBounds)) {
-                    val snapX = term.bounds!!.center.x - bounds.size.width / 2f
-                    val snapY = term.bounds!!.center.y - bounds.size.height / 2f
-                    fruit.goTo(Offset(snapX, snapY), 0.1f)
-                    onAdded(term, fruit)
-                    return
+            if (term is Quantity) {
+                term.bounds?.let { targetBounds ->
+                    if (bounds.overlaps(targetBounds)) {
+                        onAdded(term, fruit)
+                        return
+                    }
                 }
             }
         }
@@ -34,7 +33,7 @@ class Formula () {
 
     fun onAdded(quantity: Quantity, fruit: Fruit) {
         quantity.add(fruit)
-        fruits.add(Fruit({ fruit, bounds -> fruitDragged(fruit, bounds) }))
+        fruits.add(Fruit { fruit, bounds -> fruitDragged(fruit, bounds) })
         if (terms.size == 1) addSum()
     }
 

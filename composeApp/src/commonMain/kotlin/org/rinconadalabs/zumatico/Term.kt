@@ -20,7 +20,6 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 abstract class Term {
-    var bounds: Rect? = null
     abstract val image: MutableState<DrawableResource>
 
     val drawing: @Composable (modifier: Modifier, image: DrawableResource) -> Unit = { modifier, image ->
@@ -38,9 +37,6 @@ abstract class Term {
                 painter = painterResource(image),
                 contentDescription = null,
                 modifier = modifier.fillMaxSize(fraction = 0.3f)
-                    .onGloballyPositioned { coordinates ->
-                        bounds = coordinates.boundsInRoot()
-                    }
             )
         }
     }
