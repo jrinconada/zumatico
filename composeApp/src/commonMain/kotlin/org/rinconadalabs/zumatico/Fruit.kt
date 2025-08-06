@@ -6,7 +6,7 @@ import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -59,14 +59,14 @@ class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
 
         Image(
             painter = painterResource(Res.drawable.apple),
-            contentDescription = "Apple",
+            contentDescription = null,
             modifier = Modifier
                 //.align(Alignment.BottomStart)
                 .offset {
                     val offsetToUse = if (isDragging) position else moveAnimation
                     IntOffset(offsetToUse.x.roundToInt(), offsetToUse.y.roundToInt())
                 }
-                .fillMaxSize(fraction = scaleAnimation)
+                .fillMaxHeight(fraction = scaleAnimation)
                 .onGloballyPositioned { coordinates ->
                     size = coordinates.size
                 }

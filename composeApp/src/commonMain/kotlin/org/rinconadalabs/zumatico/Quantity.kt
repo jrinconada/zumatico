@@ -29,10 +29,13 @@ class Quantity : Term() {
     }
 
     private fun move(fruit: Fruit) {
+        val termScale = 0.3f
+        val fruitScale = 0.2f
+        val ratio = fruitScale / termScale
         bounds?.let {
-            val snapX = it.center.x - it.width * (0.1f / 2f)
-            val snapY = it.center.y - it.height * (0.1f / 2f)
-            fruit.goTo(Offset(snapX, snapY), 0.1f)
+            val snapX = it.center.x - it.width * ratio / 2f
+            val snapY = it.center.y - it.height * ratio / 2f
+            fruit.goTo(Offset(snapX, snapY), fruitScale)
         }
     }
 
