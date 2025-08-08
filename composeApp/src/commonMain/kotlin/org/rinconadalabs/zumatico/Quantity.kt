@@ -78,6 +78,9 @@ class Quantity : Term() {
             11 -> if (i < 3) getXOffset(i, 3)
                 else if (i < 7) getXOffset(i - 3, 4) - size * 1.2f
                 else getXOffset(i - 7, 4) + size * 1.2f
+            12 -> if (i < 4) getXOffset(i, 4)
+                else if (i < 8) getXOffset(i - 4, 4) - size * 1.2f
+                else getXOffset(i - 7, 4) + size * 1.2f
             else -> horizontalAlignmentOffset(i, size) // 4,6,8
         }
     }
@@ -91,15 +94,11 @@ class Quantity : Term() {
             3 -> if (i == 0) -size / 2f else size / 2f
             5 -> if (i == count - 1) 0f else verticalAlignmentOffset(i, size, count) * 1.6f
             6 -> if (i == 2 || i == 3) 0f else verticalAlignmentOffset(i, size, count) * 2.1f
-            7 -> if (i < 3) getYOffset(i, 3) - size * 1.1f
-                else getYOffset(i - 3, 4) + size * 1.1f
-            8 -> if (i < 4) getYOffset(i, 4) - size * 1.1f
-                else getYOffset(i - 4, 4) + size * 1.1f
+            7,8,11,12 -> if (i < -(count % 2) + 4) getYOffset(i, -(count % 2) + 4) - size * 1.1f
+                else getYOffset(i % 4, 4) + size * 1.1f
             9 -> if (i in 3..5) 0f else verticalAlignmentOffset(i, size, count) * 2.2f
             10 -> if (i < 5) getYOffset(i, 5) - size * 1.6f
                 else getYOffset(i - 5, 5) + size * 1.6f
-            11 -> if (i < 3) getYOffset(i, 3) - size * 1.2f
-                else getYOffset(i % 4, 4) + size * 1.2f
             else -> verticalAlignmentOffset(i, size, count) // 2 and 4
         }
     }
