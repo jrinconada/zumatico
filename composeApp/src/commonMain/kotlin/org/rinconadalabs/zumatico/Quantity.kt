@@ -44,9 +44,11 @@ class Quantity : Term() {
         return when(fruits.size) {
             in 2..4 -> 0.1f
             5 -> 0.08f
-            in 6..9 -> 0.07f
-            in 10..16 -> 0.05f
-            else -> 0.2f // 1
+            6 -> 0.07f
+            in 7..8 -> 0.05f
+            9 -> 0.06f
+            in 10..16 -> 0.04f
+            else -> 0.17f // 1
         }
     }
 
@@ -60,34 +62,40 @@ class Quantity : Term() {
     private fun getSize() : Float {
         val ratio = getFruitScale() / termScale
         val containerSize = bounds?.width ?: return 0f
-        println("containerSize: $containerSize size ratio: ${containerSize * ratio + (containerSize * ratio) * margin}")
         return containerSize * ratio + (containerSize * ratio) * margin
     }
 
-    private fun horizontalAlignment(i: Int, size: Float) : Float {
+    private fun horizontalAlignmentOffset(i: Int, size: Float) : Float {
         return if (i % 2 == 0) -size / 2f else size / 2f
     }
     private fun getXOffset(i: Int) : Float {
         val size = getSize()
         return when(fruits.size) {
             1,2 -> 0f
-            3 -> if (i == 0) 0f else horizontalAlignment(i, size)
-            5 -> if (i == fruits.size - 1) 0f else horizontalAlignment(i, size)
-            4 -> horizontalAlignment(i, size)
-            else -> horizontalAlignment(i, size)
+            3,7 -> if (i == 0) 0f else horizontalAlignmentOffset(i, size)
+            5,10 -> if ((i + 1) % 5 == 0) 0f else horizontalAlignmentOffset(i, size) * 1.6f
+            9 -> (if (i % 3 == 0) -size  else if (i % 3 == 1) 0f else size) * 1.1f
+            else -> horizontalAlignmentOffset(i, size) // 4,6,8
         }
     }
-    private fun verticalAlignment(i: Int, size: Float) : Float {
-        return if (i < fruits.size / 2) -size / 2f else size / 2f
+    private fun verticalAlignmentOffset(i: Int, size: Float, count: Int) : Float {
+        return if (i < count / 2) -size / 2f else size / 2f
     }
-    private fun getYOffset(i: Int) : Float {
+    private fun getYOffset(i: Int, count: Int = fruits.size) : Float {
         val size = getSize()
-        return when(fruits.size) {
+        return when(count) {
             1 -> 0f
             3 -> if (i == 0) -size / 2f else size / 2f
-            5 -> if (i == fruits.size - 1) 0f else verticalAlignment(i, size)
-            6 -> if (i == 2 || i == 3) 0f else verticalAlignment(i, size)
-            else -> verticalAlignment(i, size)
+            5 -> if (i == count - 1) 0f else verticalAlignmentOffset(i, size, count) * 1.6f
+            6 -> if (i == 2 || i == 3) 0f else verticalAlignmentOffset(i, size, count) * 2.1f
+            7 -> if (i < 3) getYOffset(i, 3) - size * 1.1f
+            else getYOffset(i - 3, 4) + size * 1.1f
+            8 -> if (i < 4) getYOffset(i, 4) - size * 1.1f
+            else getYOffset(i - 4, 4) + size * 1.1f
+            9 -> if (i in 3..5) 0f else verticalAlignmentOffset(i, size, count) * 2.2f
+            10 -> if (i < 5) getYOffset(i, 5) - size * 1.6f
+            else getYOffset(i - 5, 5) + size * 1.6f
+            else -> verticalAlignmentOffset(i, size, count) // 2 and 4
         }
     }
 
