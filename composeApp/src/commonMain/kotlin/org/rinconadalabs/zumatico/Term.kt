@@ -12,11 +12,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 abstract class Term {
     abstract val image: MutableState<DrawableResource>
+    abstract val filter: MutableState<ColorFilter?>
 
     val drawing: @Composable (modifier: Modifier, image: DrawableResource) -> Unit = { modifier, image ->
         val visible = remember {
@@ -32,6 +35,7 @@ abstract class Term {
             Image(
                 painter = painterResource(image),
                 contentDescription = null,
+                colorFilter = filter.value,
                 modifier = modifier.fillMaxHeight()
             )
         }

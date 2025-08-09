@@ -19,7 +19,7 @@ class Formula () {
         terms.forEachIndexed { index, term ->
             if (term is Quantity) {
                 term.bounds?.let { targetBounds ->
-                    if (bounds.overlaps(targetBounds)) {
+                    if (bounds.overlaps(targetBounds) && !term.isFull()) {
                         onAdded(fruit, term)
                         return
                     }

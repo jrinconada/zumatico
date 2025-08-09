@@ -1,10 +1,13 @@
 package org.rinconadalabs.zumatico
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import zumatico.composeapp.generated.resources.Res
@@ -12,13 +15,17 @@ import zumatico.composeapp.generated.resources.unknown
 
 class Quantity : Term() {
     var bounds: Rect? = null
-    val termScale = 0.3f
-    val margin = 0.1f
     override val image = mutableStateOf(Res.drawable.unknown)
+    override var filter: MutableState<ColorFilter?> = mutableStateOf(null)
+    private val activeColor = Color(0xCCA3A3A3)
+    private val termScale = 0.3f
+    private val margin = 0.1f
+    private val max = 16
     private var fruits = mutableSetOf<Fruit>()
 
     val count get() = fruits.size
     fun add(fruit: Fruit) {
+        if (isFull()) return
         fruits.add(fruit)
         updateFruits()
     }
@@ -28,6 +35,9 @@ class Quantity : Term() {
     }
 
     private fun updateFruits() {
+        if (isFull()) filter.value = ColorFilter.tint(Color.Transparent)
+        else if (isEmpty()) filter.value = null
+        else filter.value = ColorFilter.tint(activeColor)
         fruits.forEachIndexed { i, fruit -> move(i, fruit) }
     }
 
@@ -110,6 +120,7 @@ class Quantity : Term() {
     }
 
     fun isEmpty() = fruits.isEmpty()
+    fun isFull() = fruits.size == max
 
     @Composable
     override fun Draw() {

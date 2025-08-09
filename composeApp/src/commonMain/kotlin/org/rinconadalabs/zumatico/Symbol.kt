@@ -9,8 +9,10 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import org.jetbrains.compose.resources.DrawableResource
 import zumatico.composeapp.generated.resources.Res
@@ -23,7 +25,7 @@ class Symbol (which: DrawableResource, val onSwipe: () -> Unit) : Term() {
         val Plus = Res.drawable.plus
     }
     override var image = mutableStateOf(which)
-
+    override var filter: MutableState<ColorFilter?> = mutableStateOf(null)
     var swipeDirection = 0f
 
     @Composable
