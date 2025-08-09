@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateSetOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -15,7 +17,9 @@ import androidx.compose.ui.graphics.Color
 import org.rinconadalabs.zumatico.Symbol.Symbols.*
 
 class Formula () {
-
+    private val correctColor = Color(0xFFaacca1)
+    var fruits = mutableStateSetOf(Fruit { fruit, bounds -> fruitDragged(fruit, bounds) })
+    val terms = mutableStateListOf<Term>(Quantity())
     fun fruitDragged(fruit: Fruit, bounds: Rect) {
         terms.forEachIndexed { index, term ->
             if (term is Quantity) {
@@ -94,15 +98,14 @@ class Formula () {
         }
     }
 
-    var fruits = mutableStateSetOf(Fruit { fruit, bounds -> fruitDragged(fruit, bounds) })
-    val terms = mutableStateListOf<Term>(Quantity())
-
     @Composable
     fun Draw() {
+        val isValid = remember { mutableStateOf(true) }
+
         Box (
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Gray)
+                .background(if (Validator.isValid(terms)) correctColor else Color.Gray)
         ) {
             Row(modifier = Modifier.align(Alignment.Center).fillMaxHeight(fraction = 0.3f)) {
                 terms.forEach { term -> term.Draw() } }
