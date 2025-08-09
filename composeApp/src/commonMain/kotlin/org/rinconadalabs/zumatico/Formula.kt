@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import org.rinconadalabs.zumatico.Symbol.Symbols.*
 
 class Formula () {
 
@@ -37,9 +38,9 @@ class Formula () {
     }
 
     fun addSum() {
-        terms.add(Symbol(Symbol.Plus, onSwipe = { symbolChange() }))
+        terms.add(Symbol(Plus, onSwipe = { symbolChange() }))
         terms.add(Quantity())
-        terms.add(Symbol(Symbol.Equal, onSwipe = { symbolChange() }))
+        terms.add(Symbol(Equal, onSwipe = { symbolChange() }))
         terms.add(Quantity())
     }
 
@@ -50,8 +51,8 @@ class Formula () {
     }
 
     fun addEqual() {
-        if (terms[terms.size - 2].image.value != Symbol.Equal) {
-            terms.add(Symbol(Symbol.Equal, onSwipe = { symbolChange() }))
+        if (terms[terms.size - 2].isOperation()) {
+            terms.add(Symbol(Equal, onSwipe = { symbolChange() }))
             terms.add(Quantity())
         }
     }
@@ -59,8 +60,8 @@ class Formula () {
     fun removeConsecutiveEmptyEqual() {
         var toRemove = -1
         for (i in 0..terms.size - 5 step 2) {
-            if (terms[i+1].image.value != Symbol.Equal
-                || terms[i+3].image.value != Symbol.Equal) continue
+            if (terms[i+1].isOperation()
+                || terms[i+3].isOperation()) continue
             if ((terms[i] as Quantity).count == 0) {
                 toRemove = i
             }

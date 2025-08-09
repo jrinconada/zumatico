@@ -12,14 +12,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.rinconadalabs.zumatico.Symbol.Symbols
 
 abstract class Term {
     abstract val image: MutableState<DrawableResource>
     abstract val filter: MutableState<ColorFilter?>
+
+    fun isOperation() : Boolean {
+        return !isComparison()
+    }
+
+    fun isComparison() : Boolean {
+        return image.value == Symbols.Equal.resource ||
+                image.value == Symbols.Greater.resource ||
+                image.value == Symbols.Lower.resource
+    }
 
     val drawing: @Composable (modifier: Modifier, image: DrawableResource) -> Unit = { modifier, image ->
         val visible = remember {
