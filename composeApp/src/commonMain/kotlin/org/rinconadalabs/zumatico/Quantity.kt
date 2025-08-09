@@ -45,9 +45,9 @@ class Quantity : Term() {
             in 2..4 -> 0.1f
             5 -> 0.08f
             6 -> 0.07f
-            in 7..8 -> 0.05f
+            in 7..8, 11, 12, 16 -> 0.05f
             9 -> 0.06f
-            in 10..16 -> 0.04f
+            in 10..15 -> 0.04f
             else -> 0.17f // 1
         }
     }
@@ -75,12 +75,14 @@ class Quantity : Term() {
             3,7 -> if (i == 0) 0f else horizontalAlignmentOffset(i, size)
             5,10 -> if ((i + 1) % 5 == 0) 0f else horizontalAlignmentOffset(i, size) * 1.6f
             9 -> (if (i % 3 == 0) -size  else if (i % 3 == 1) 0f else size) * 1.1f
-            11 -> if (i < 3) getXOffset(i, 3)
-                else if (i < 7) getXOffset(i - 3, 4) - size * 1.2f
+            11,12 -> if (i < count - 8) getXOffset(i, count - 8)
+                else if (i < count - 4) getXOffset(i - (count - 8), 4) - size * 1.2f
                 else getXOffset(i - 7, 4) + size * 1.2f
-            12 -> if (i < 4) getXOffset(i, 4)
-                else if (i < 8) getXOffset(i - 4, 4) - size * 1.2f
-                else getXOffset(i - 7, 4) + size * 1.2f
+            13,14,15 -> if (i < count - 10) getXOffset(i, count - 10)
+                else if (i < count - 5) getXOffset(i - (count - 10), 5) - size * 1.5f
+                else getXOffset(i - (count - 5), 5) + size * 1.5f
+            16 -> if (i in 0..3 || i in 8..11) getXOffset(i % 4, 4) - size * 1.1f
+                else getXOffset(i % 4, 4) + size * 1.1f
             else -> horizontalAlignmentOffset(i, size) // 4,6,8
         }
     }
@@ -94,11 +96,15 @@ class Quantity : Term() {
             3 -> if (i == 0) -size / 2f else size / 2f
             5 -> if (i == count - 1) 0f else verticalAlignmentOffset(i, size, count) * 1.6f
             6 -> if (i == 2 || i == 3) 0f else verticalAlignmentOffset(i, size, count) * 2.1f
-            7,8,11,12 -> if (i < -(count % 2) + 4) getYOffset(i, -(count % 2) + 4) - size * 1.1f
-                else getYOffset(i % 4, 4) + size * 1.1f
+            7,8,11,12 -> if (i < -(count % 2) + 4) getYOffset(i, -(count % 2) + 4) - size * 1.15f
+                else getYOffset(i % 4, 4) + size * 1.15f
             9 -> if (i in 3..5) 0f else verticalAlignmentOffset(i, size, count) * 2.2f
             10 -> if (i < 5) getYOffset(i, 5) - size * 1.6f
                 else getYOffset(i - 5, 5) + size * 1.6f
+            13,14,15 -> if (i < count - 10) getYOffset(i, count - 10) - size * 1.5f
+                else getYOffset((i - (count - 10)) % 5, 5) + size * 1.3f
+            16 -> if (i < 8) getYOffset(i % 4, 4) - size * 1.1f
+                else getYOffset(i % 4, 4) + size * 1.1f
             else -> verticalAlignmentOffset(i, size, count) // 2 and 4
         }
     }
