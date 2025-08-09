@@ -10,8 +10,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.DrawableResource
 import zumatico.composeapp.generated.resources.Res
 import zumatico.composeapp.generated.resources.div
@@ -104,7 +104,6 @@ class Symbol (which: Symbols, val onSwipe: () -> Unit) : Term() {
             drawing(Modifier.pointerInput(Unit) {
                 detectDragGestures(
                     onDragEnd = {
-                        println("swipeDirection: $swipeDirection")
                         if (isVertical())
                             changeOperation()
                         else
@@ -114,7 +113,7 @@ class Symbol (which: Symbols, val onSwipe: () -> Unit) : Term() {
                         swipeDirection = dragAmount
                     }
                 )
-            }, content)
+            }.padding(20.dp), content)
         }
 
     }
