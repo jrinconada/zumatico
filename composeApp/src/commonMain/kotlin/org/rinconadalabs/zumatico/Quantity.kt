@@ -17,12 +17,13 @@ class Quantity : Term() {
     var bounds: Rect? = null
     override val image = mutableStateOf(Res.drawable.unknown)
     override var filter: MutableState<ColorFilter?> = mutableStateOf(null)
-    private val activeColor = Color(0xCCA3A3A3)
+    private val activeColor = Color(0xCC777777)
     private val termScale = 0.3f
     private val margin = 0.1f
     private val max = 16
     private var fruits = mutableSetOf<Fruit>()
-
+    fun isEmpty() = fruits.isEmpty()
+    fun isFull() = fruits.size == max
     val count get() = fruits.size
     fun add(fruit: Fruit) {
         if (isFull()) return
@@ -33,14 +34,12 @@ class Quantity : Term() {
         fruits.remove(fruit)
         updateFruits()
     }
-
     private fun updateFruits() {
         if (isFull()) filter.value = ColorFilter.tint(Color.Transparent)
         else if (isEmpty()) filter.value = null
         else filter.value = ColorFilter.tint(activeColor)
         fruits.forEachIndexed { i, fruit -> move(i, fruit) }
     }
-
     private fun move(i: Int, fruit: Fruit) {
         val fruitScale = getFruitScale()
         bounds?.let {
@@ -49,7 +48,6 @@ class Quantity : Term() {
             fruit.goTo(Offset(snapX, snapY), fruitScale)
         }
     }
-
     private fun getFruitScale() : Float {
         return when(fruits.size) {
             in 2..4 -> 0.1f
@@ -61,20 +59,17 @@ class Quantity : Term() {
             else -> 0.17f // 1
         }
     }
-
     private fun centerCorrectionOffset() : Float {
         val fruitScale = getFruitScale()
         val ratio = fruitScale / termScale
         bounds?.let { return it.width * ratio / 2f }
         return 0f
     }
-
     private fun getSize() : Float {
         val ratio = getFruitScale() / termScale
         val containerSize = bounds?.width ?: return 0f
         return containerSize * ratio + (containerSize * ratio) * margin
     }
-
     private fun horizontalAlignmentOffset(i: Int, size: Float) : Float {
         return if (i % 2 == 0) -size / 2f else size / 2f
     }
@@ -118,10 +113,6 @@ class Quantity : Term() {
             else -> verticalAlignmentOffset(i, size, count) // 2 and 4
         }
     }
-
-    fun isEmpty() = fruits.isEmpty()
-    fun isFull() = fruits.size == max
-
     @Composable
     override fun Draw() {
         drawing(Modifier.onGloballyPositioned { coordinates ->

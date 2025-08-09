@@ -1,15 +1,16 @@
 package org.rinconadalabs.zumatico
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateSetOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -17,9 +18,11 @@ import androidx.compose.ui.graphics.Color
 import org.rinconadalabs.zumatico.Symbol.Symbols.*
 
 class Formula () {
-    private val correctColor = Color(0xFFaacca1)
+    private val normalColor = Color(0xFF606060)
+    private val validColor = Color(0xFF8bb592)
     var fruits = mutableStateSetOf(Fruit { fruit, bounds -> fruitDragged(fruit, bounds) })
     val terms = mutableStateListOf<Term>(Quantity())
+    val valid = mutableStateOf(false)
     fun fruitDragged(fruit: Fruit, bounds: Rect) {
         terms.forEachIndexed { index, term ->
             if (term is Quantity) {
@@ -39,6 +42,7 @@ class Formula () {
         to.add(fruit)
         fruits.add(Fruit { fruit, bounds -> fruitDragged(fruit, bounds) })
         if (terms.size == 1) addSum()
+        valid.value = Validator.isValid(terms)
     }
 
     fun addSum() {
@@ -52,6 +56,7 @@ class Formula () {
         addEqual()
         removeConsecutiveEmptyEqual() // First call prevents double zeroes (0 = 0)
         removeConsecutiveEmptyEqual() // Second call prevents triple zeroes (0 = 0 = 0)
+        valid.value = Validator.isValid(terms)
     }
 
     fun addEqual() {
@@ -96,16 +101,17 @@ class Formula () {
         } else {
             removeConsecutiveEmptyEqual()
         }
+        valid.value = Validator.isValid(terms)
     }
-
     @Composable
     fun Draw() {
-        val isValid = remember { mutableStateOf(true) }
+        val backgroundColor: Color by animateColorAsState(
+            if (valid.value) validColor else normalColor)
 
         Box (
             modifier = Modifier
                 .fillMaxSize()
-                .background(if (Validator.isValid(terms)) correctColor else Color.Gray)
+                .background(backgroundColor)
         ) {
             Row(modifier = Modifier.align(Alignment.Center).fillMaxHeight(fraction = 0.3f)) {
                 terms.forEach { term -> term.Draw() } }
