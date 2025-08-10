@@ -19,8 +19,10 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.plus
 import org.jetbrains.compose.resources.painterResource
 import zumatico.composeapp.generated.resources.Res
 import zumatico.composeapp.generated.resources.apple
@@ -28,17 +30,25 @@ import kotlin.math.roundToInt
 
 class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
     private val originalScale = 0.15f
-    private var position by mutableStateOf(Offset.Zero)
+    private val randomShake: Offset = randomPosition()
+    private var position by mutableStateOf(randomShake)
     private var scale by mutableStateOf(originalScale)
 
     fun backToBasket() {
-        position = Offset.Zero
+        position = randomShake
         scale = originalScale
     }
 
     fun goTo(position: Offset, scale: Float) {
         this.position = position
         this.scale = scale
+    }
+
+    private fun randomPosition() : Offset {
+        val range = 30
+        val x = (-range..range).random()
+        val y = (-range..range).random()
+        return Offset(x.toFloat(), y.toFloat())
     }
 
     @Composable
@@ -51,7 +61,7 @@ class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
         fun onDragEnd() {
             isDragging = false
             val bounds = Rect(
-                offset = position,
+                offset = position.minus(randomShake),
                 size = Size(size.width.toFloat(), size.height.toFloat())
             )
             dragStopped(this, bounds)
@@ -61,7 +71,6 @@ class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
             painter = painterResource(Res.drawable.apple),
             contentDescription = null,
             modifier = Modifier
-                //.align(Alignment.BottomStart)
                 .offset {
                     val offsetToUse = if (isDragging) position else moveAnimation
                     IntOffset(offsetToUse.x.roundToInt(), offsetToUse.y.roundToInt())
