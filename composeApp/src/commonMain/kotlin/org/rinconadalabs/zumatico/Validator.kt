@@ -27,11 +27,12 @@ class Validator {
                         Equal.resource -> a == b
                         else -> false
                     }
-                    a = -1
+                    if (!valid) return false
+                    a = b
                 } else { // Second term of operation
                     b = (terms[i] as Quantity).count
                     when (terms[i-1].image.value) {
-                        Div.resource -> a = a / b
+                        Div.resource -> if (b == 0) return false else a = a / b
                         Minus.resource -> a = a - b
                         Plus.resource -> a = a + b
                         Mult.resource -> a = a * b
