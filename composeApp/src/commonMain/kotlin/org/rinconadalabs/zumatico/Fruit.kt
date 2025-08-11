@@ -29,24 +29,26 @@ import kotlin.math.roundToInt
 
 class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
     private val originalScale = 0.15f
-    private val randomShake: Offset = Offset.Zero
-    private var position by mutableStateOf(randomShake)
+    private val randomShake: Offset = randomPosition()
+    private var relativePosition by mutableStateOf(Offset.Zero)
     private var scale by mutableStateOf(originalScale)
-    private var origin: Offset? by mutableStateOf(null)
+    private var origin: Offset by mutableStateOf(Offset.Zero)
     private var size: IntSize by mutableStateOf(IntSize.Zero)
-    private var newPosition: Offset? = Offset.Zero
+    private var absolutePosition: Offset? = null
+    private var inBasket = true
 
     fun backToBasket() {
-        position = randomShake
+        inBasket = true
+        absolutePosition = origin
         scale = originalScale
+        relativePosition = getRelativeOffset()
     }
 
     fun goTo(position: Offset, scale: Float) {
+        inBasket = false
         this.scale = scale
-        println("size: $size scale: $scale")
-        newPosition = position
-        origin?.let { this.position = position + randomShake - it }
-        println("goTo: ${this.position} Root position: $position")
+        absolutePosition = position
+        relativePosition = getRelativeOffset()
     }
 
     private fun randomPosition() : Offset {
@@ -56,22 +58,28 @@ class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
         return Offset(x.toFloat(), y.toFloat())
     }
 
+    private fun getAbsolutePosition(): Offset {
+        return relativePosition + origin - randomShake
+    }
+
+    private fun getRelativeOffset(): Offset {
+        val shake = if (inBasket) randomShake else Offset.Zero
+        return (absolutePosition?.let { it - origin } ?: Offset.Zero) + shake
+    }
+
     @Composable
     fun Draw(height: Float) {
-        val moveAnimation by animateOffsetAsState(targetValue = position, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+        val moveAnimation by animateOffsetAsState(targetValue = relativePosition, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
         val scaleAnimation by animateFloatAsState(targetValue = scale, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
-        //var size by remember { mutableStateOf(IntSize.Zero) }
         var isDragging by remember { mutableStateOf(false) }
 
         fun onDragEnd() {
             isDragging = false
-            origin?.let {
-                val bounds = Rect(
-                    offset = position - randomShake + it,
-                    size = Size(size.width.toFloat(), size.height.toFloat())
-                )
-                dragStopped(this, bounds)
-            }
+            val bounds = Rect(
+                offset = getAbsolutePosition(),
+                size = Size(size.width.toFloat(), size.height.toFloat())
+            )
+            dragStopped(this, bounds)
         }
 
         Image(
@@ -79,18 +87,17 @@ class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
             contentDescription = null,
             modifier = Modifier
                 .offset {
-                    val offsetToUse = if (isDragging) position else moveAnimation
-                    //println("offset: $offsetToUse Root position: ${position - randomShake + (origin ?: Offset.Zero)}")
+                    val offsetToUse = if (isDragging) relativePosition else moveAnimation
+                    println("offset: $offsetToUse Absolute position: ${getAbsolutePosition()}")
                     IntOffset(offsetToUse.x.roundToInt(), offsetToUse.y.roundToInt())
                 }
+                .fillMaxHeight(fraction = scaleAnimation)
                 .onSizeChanged { newSize ->
                     size = newSize
                     origin = Offset(0f, height - size.height)
-                    newPosition?.let {
-                        this.position = it - (origin ?: Offset.Zero)
-                    }
+                    relativePosition = getRelativeOffset()
+                    println("onSizeChanged: $newSize relativePosition: $relativePosition")
                 }
-                .fillMaxHeight(fraction = scaleAnimation)
                 .onGloballyPositioned { coordinates ->
                     size = coordinates.size
                     origin = Offset(0f, height - size.height)
@@ -99,14 +106,14 @@ class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
                     detectDragGestures(
                         onDragStart = {
                             isDragging = true
-                            position = moveAnimation
+                            relativePosition = moveAnimation
                         },
                         onDragEnd = {
                             onDragEnd()
                         },
                         onDrag = { change, dragAmount ->
                             change.consume()
-                            position = position.plus(dragAmount)
+                            relativePosition = relativePosition.plus(dragAmount)
                         }
                     )
                 }
