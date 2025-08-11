@@ -21,9 +21,10 @@ import org.rinconadalabs.zumatico.Symbol.Symbols.*
 class Formula () {
     private val normalColor = Color(0xFF606060)
     private val validColor = Color(0xFF8bb592)
-    var fruits = mutableStateSetOf(Fruit { fruit, bounds -> fruitDragged(fruit, bounds) })
     val terms = mutableStateListOf<Term>(Quantity())
     val valid = mutableStateOf(false)
+    val basket = Basket(fruitDragged = { fruit, bounds -> fruitDragged(fruit, bounds) })
+
     fun fruitDragged(fruit: Fruit, bounds: Rect) {
         terms.forEachIndexed { index, term ->
             if (term is Quantity) {
@@ -36,12 +37,12 @@ class Formula () {
             }
         }
         onRemoved(fruit)
-        fruit.backToBasket()
+        basket.put(fruit)
     }
 
     fun onAdded(fruit: Fruit, to: Quantity) {
         to.add(fruit)
-        fruits.add(Fruit { fruit, bounds -> fruitDragged(fruit, bounds) })
+        basket.get()
         if (terms.size == 1) addSum()
         valid.value = Validator.isValid(terms)
     }
@@ -116,10 +117,7 @@ class Formula () {
         ) {
             Row(modifier = Modifier.align(Alignment.Center).fillMaxHeight(fraction = 0.3f)) {
                 terms.forEach { term -> term.Draw() } }
-            BoxWithConstraints(
-                contentAlignment = Alignment.BottomStart,
-                modifier = Modifier.fillMaxHeight()) {
-                fruits.forEach { fruit -> fruit.Draw(maxHeight.value) } }
+            basket.Draw()
         }
     }
 }

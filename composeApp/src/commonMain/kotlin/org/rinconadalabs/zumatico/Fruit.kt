@@ -88,7 +88,6 @@ class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
             modifier = Modifier
                 .offset {
                     val offsetToUse = if (isDragging) relativePosition else moveAnimation
-                    println("offset: $offsetToUse Absolute position: ${getAbsolutePosition()}")
                     IntOffset(offsetToUse.x.roundToInt(), offsetToUse.y.roundToInt())
                 }
                 .fillMaxHeight(fraction = scaleAnimation)
@@ -96,7 +95,6 @@ class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
                     size = newSize
                     origin = Offset(0f, height - size.height)
                     relativePosition = getRelativeOffset()
-                    println("onSizeChanged: $newSize relativePosition: $relativePosition")
                 }
                 .onGloballyPositioned { coordinates ->
                     size = coordinates.size
