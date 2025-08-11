@@ -42,7 +42,7 @@ class Formula () {
 
     fun onAdded(fruit: Fruit, to: Quantity) {
         to.add(fruit)
-        basket.get()
+        basket.get(fruit)
         if (terms.size == 1) addSum()
         valid.value = Validator.isValid(terms)
     }

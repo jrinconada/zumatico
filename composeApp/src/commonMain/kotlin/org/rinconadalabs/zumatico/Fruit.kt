@@ -27,9 +27,8 @@ import zumatico.composeapp.generated.resources.Res
 import zumatico.composeapp.generated.resources.apple
 import kotlin.math.roundToInt
 
-class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
+class Fruit(val positionInBasket: Offset, val dragStopped: (Fruit, Rect) -> Unit) {
     private val originalScale = 0.15f
-    private val randomShake: Offset = randomPosition()
     private var relativePosition by mutableStateOf(Offset.Zero)
     private var scale by mutableStateOf(originalScale)
     private var origin: Offset by mutableStateOf(Offset.Zero)
@@ -59,11 +58,11 @@ class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
     }
 
     private fun getAbsolutePosition(): Offset {
-        return relativePosition + origin - randomShake
+        return relativePosition + origin - positionInBasket
     }
 
     private fun getRelativeOffset(): Offset {
-        val shake = if (inBasket) randomShake else Offset.Zero
+        val shake = if (inBasket) positionInBasket else Offset.Zero
         return (absolutePosition?.let { it - origin } ?: Offset.Zero) + shake
     }
 
