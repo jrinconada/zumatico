@@ -3,6 +3,7 @@ package org.rinconadalabs.zumatico
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -115,7 +116,10 @@ class Formula () {
         ) {
             Row(modifier = Modifier.align(Alignment.Center).fillMaxHeight(fraction = 0.3f)) {
                 terms.forEach { term -> term.Draw() } }
-            Box { fruits.forEach { fruit -> fruit.Draw() } }
+            BoxWithConstraints(
+                contentAlignment = Alignment.BottomStart,
+                modifier = Modifier.fillMaxHeight()) {
+                fruits.forEach { fruit -> fruit.Draw(maxHeight.value) } }
         }
     }
 }

@@ -19,10 +19,9 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.plus
 import org.jetbrains.compose.resources.painterResource
 import zumatico.composeapp.generated.resources.Res
 import zumatico.composeapp.generated.resources.apple
@@ -30,9 +29,12 @@ import kotlin.math.roundToInt
 
 class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
     private val originalScale = 0.15f
-    private val randomShake: Offset = randomPosition()
+    private val randomShake: Offset = Offset.Zero
     private var position by mutableStateOf(randomShake)
     private var scale by mutableStateOf(originalScale)
+    private var origin: Offset? by mutableStateOf(null)
+    private var size: IntSize by mutableStateOf(IntSize.Zero)
+    private var newPosition: Offset? = Offset.Zero
 
     fun backToBasket() {
         position = randomShake
@@ -40,8 +42,11 @@ class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
     }
 
     fun goTo(position: Offset, scale: Float) {
-        this.position = position
         this.scale = scale
+        println("size: $size scale: $scale")
+        newPosition = position
+        origin?.let { this.position = position + randomShake - it }
+        println("goTo: ${this.position} Root position: $position")
     }
 
     private fun randomPosition() : Offset {
@@ -52,19 +57,21 @@ class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
     }
 
     @Composable
-    fun Draw() {
+    fun Draw(height: Float) {
         val moveAnimation by animateOffsetAsState(targetValue = position, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
         val scaleAnimation by animateFloatAsState(targetValue = scale, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
-        var size by remember { mutableStateOf(IntSize.Zero) }
+        //var size by remember { mutableStateOf(IntSize.Zero) }
         var isDragging by remember { mutableStateOf(false) }
 
         fun onDragEnd() {
             isDragging = false
-            val bounds = Rect(
-                offset = position.minus(randomShake),
-                size = Size(size.width.toFloat(), size.height.toFloat())
-            )
-            dragStopped(this, bounds)
+            origin?.let {
+                val bounds = Rect(
+                    offset = position - randomShake + it,
+                    size = Size(size.width.toFloat(), size.height.toFloat())
+                )
+                dragStopped(this, bounds)
+            }
         }
 
         Image(
@@ -73,11 +80,20 @@ class Fruit(val dragStopped: (Fruit, Rect) -> Unit) {
             modifier = Modifier
                 .offset {
                     val offsetToUse = if (isDragging) position else moveAnimation
+                    //println("offset: $offsetToUse Root position: ${position - randomShake + (origin ?: Offset.Zero)}")
                     IntOffset(offsetToUse.x.roundToInt(), offsetToUse.y.roundToInt())
+                }
+                .onSizeChanged { newSize ->
+                    size = newSize
+                    origin = Offset(0f, height - size.height)
+                    newPosition?.let {
+                        this.position = it - (origin ?: Offset.Zero)
+                    }
                 }
                 .fillMaxHeight(fraction = scaleAnimation)
                 .onGloballyPositioned { coordinates ->
                     size = coordinates.size
+                    origin = Offset(0f, height - size.height)
                 }
                 .pointerInput(Unit) {
                     detectDragGestures(
