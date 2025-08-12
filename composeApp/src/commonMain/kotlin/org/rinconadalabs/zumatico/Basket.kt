@@ -30,26 +30,20 @@ class Basket(val fruitDragged: (Fruit, Rect) -> Unit) {
     fun get(fruit: Fruit) {
         // Add replacement fruit in the same position
         fruits.add(createFruit(0,fruit.positionInBasket))
-        println("Fruit get ${fruits.size}")
-        println(fruits)
     }
     fun putBack(fruit: Fruit) {
         fruit.backToBasket()
         // Remove the fruit because it was replaced
         fruits.remove(fruit)
-        println("Fruit put ${fruits.size}")
-        println(fruits)
     }
 
     fun release(fruit: Fruit) {
         fruit.backToBasket()
-        println(fruits)
     }
     private fun initialFruits(): List<Fruit> {
         val fruits = mutableStateListOf<Fruit>()
         for (i in 0..places - 1) {
             fruits.add(createFruit(i))
-            println(fruits)
         }
         return fruits
     }

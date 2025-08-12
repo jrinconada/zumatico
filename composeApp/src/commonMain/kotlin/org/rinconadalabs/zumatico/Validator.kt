@@ -1,45 +1,76 @@
 package org.rinconadalabs.zumatico
 
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import org.rinconadalabs.zumatico.Symbol.Symbols.Div
-import org.rinconadalabs.zumatico.Symbol.Symbols.Equal
-import org.rinconadalabs.zumatico.Symbol.Symbols.Greater
-import org.rinconadalabs.zumatico.Symbol.Symbols.Lower
-import org.rinconadalabs.zumatico.Symbol.Symbols.Minus
-import org.rinconadalabs.zumatico.Symbol.Symbols.Mult
-import org.rinconadalabs.zumatico.Symbol.Symbols.Plus
+import org.rinconadalabs.zumatico.Symbol.Symbols.*
 
+/**
+ * Validate a formula with PEDMAS order of operations
+ * - Parenthesis and Exponents are not supported
+ * - First operate with Divisions and Multiplications with the same priority and left to right
+ * - Then operate Addition and Substraction have with the same priority and left to right
+ * - Finally evaluate the comparators
+ */
 class Validator {
     companion object {
         fun isValid(terms: SnapshotStateList<Term>): Boolean {
-            var a = -1
-            var b: Int
-            var valid = false
-            for (i in terms.indices) {
-                if (terms[i] is Symbol) continue // Symbol term
-                if (a == -1) { // First term
-                    a = (terms[i] as Quantity).count
-                } else if (terms[i-1].isComparison()) { // Last term of comparison
-                    b = (terms[i] as Quantity).count
-                    valid = when (terms[i-1].image.value) {
-                        Lower.resource -> a < b
-                        Greater.resource -> a > b
-                        Equal.resource -> a == b
-                        else -> false
+            var formula = toList(terms)
+            formula = operate(formula, true)
+            formula = operate(formula, false)
+            return evaluate(formula)
+        }
+
+        fun toList(terms: SnapshotStateList<Term>): MutableList<Int> {
+            val list = mutableListOf<Int>()
+            terms.forEach { term ->
+                if (term is Symbol) {
+                    list.add(term.image.value.hashCode())
+                } else {
+                    list.add((term as Quantity).count)
+                }
+            }
+            return list
+        }
+
+        fun replace(i: Int, formula: MutableList<Int>, result: Int) {
+            formula.removeAt(i - 1) // Remove first term
+            formula.removeAt(i - 1) // Remove operation
+            formula[i - 1] = result // Replace second term with result
+        }
+
+        fun operate(formula: MutableList<Int>, divAndMult: Boolean): MutableList<Int> {
+            for (i in formula.indices) {
+                if (divAndMult) {
+                    if (formula[i] == Mult.resource.hashCode()) {
+                        replace(i, formula, formula[i - 1] * formula[i + 1])
+                        return operate(formula, divAndMult)
+                    } else if (formula[i] == Div.resource.hashCode()) {
+                        replace(i, formula, if (formula[i + 1] == 0) Int.MAX_VALUE else formula[i - 1] / formula[i + 1])
+                        return operate(formula, divAndMult)
                     }
-                    if (!valid) return false
-                    a = b
-                } else { // Second term of operation
-                    b = (terms[i] as Quantity).count
-                    when (terms[i-1].image.value) {
-                        Div.resource -> if (b == 0) return false else a = a / b
-                        Minus.resource -> a = a - b
-                        Plus.resource -> a = a + b
-                        Mult.resource -> a = a * b
+                } else { // Addition & substraction
+                    if (formula[i] == Plus.resource.hashCode()) {
+                        replace(i, formula, formula[i - 1] + formula[i + 1])
+                        return operate(formula, divAndMult)
+                    } else if (formula[i] == Minus.resource.hashCode()) {
+                        replace(i, formula, formula[i - 1] - formula[i + 1])
+                        return operate(formula, divAndMult)
                     }
                 }
             }
-            return valid
+            return formula
+        }
+
+        fun evaluate(formula: MutableList<Int>): Boolean {
+            for (i in formula.indices) {
+                val valid = when (formula[i]) {
+                    Lower.resource.hashCode() -> formula[i - 1] < formula[i + 1]
+                    Equal.resource.hashCode() -> formula[i - 1] == formula[i + 1]
+                    Greater.resource.hashCode() -> formula[i - 1] > formula[i + 1]
+                    else -> true
+                }
+                if (!valid) return false
+            }
+            return true
         }
     }
 }
