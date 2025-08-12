@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,21 +31,25 @@ class Basket(val fruitDragged: (Fruit, Rect) -> Unit) {
         // Add replacement fruit in the same position
         fruits.add(createFruit(0,fruit.positionInBasket))
         println("Fruit get ${fruits.size}")
+        println(fruits)
     }
     fun putBack(fruit: Fruit) {
         fruit.backToBasket()
         // Remove the fruit because it was replaced
         fruits.remove(fruit)
         println("Fruit put ${fruits.size}")
+        println(fruits)
     }
 
     fun release(fruit: Fruit) {
         fruit.backToBasket()
+        println(fruits)
     }
     private fun initialFruits(): List<Fruit> {
         val fruits = mutableStateListOf<Fruit>()
         for (i in 0..places - 1) {
             fruits.add(createFruit(i))
+            println(fruits)
         }
         return fruits
     }
@@ -62,7 +67,9 @@ class Basket(val fruitDragged: (Fruit, Rect) -> Unit) {
         BoxWithConstraints(
             contentAlignment = Alignment.BottomStart,
             modifier = Modifier.fillMaxHeight()) {
-                fruits.forEach { fruit -> fruit.Draw(maxHeight.value) }
+                fruits.forEach { fruit ->
+                    key(fruit.hashCode()) { fruit.Draw(maxHeight.value) }
+                }
                 Image(painter = painterResource(Res.drawable.basket),
                     contentDescription = null,
                     modifier = Modifier.fillMaxHeight(fraction = scale)

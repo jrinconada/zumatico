@@ -25,10 +25,11 @@ class Quantity : Term() {
     fun isEmpty() = fruits.isEmpty()
     fun isFull() = fruits.size == max
     val count get() = fruits.size
-    fun add(fruit: Fruit) {
-        if (isFull()) return
-        fruits.add(fruit)
+    fun add(fruit: Fruit): Boolean {
+        if (isFull()) return false
+        val added = fruits.add(fruit)
         updateFruits()
+        return added
     }
     fun remove(fruit: Fruit): Boolean {
         val removed = fruits.remove(fruit)

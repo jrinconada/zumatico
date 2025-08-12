@@ -28,6 +28,7 @@ class Formula () {
             if (term is Quantity) {
                 term.bounds?.let { targetBounds ->
                     if (bounds.overlaps(targetBounds) && !term.isFull()) {
+                        println("Fruit $fruit dragged to $index")
                         onAdded(fruit, term)
                         return
                     }
@@ -38,8 +39,9 @@ class Formula () {
     }
 
     fun onAdded(fruit: Fruit, to: Quantity) {
-        to.add(fruit)
-        basket.get(fruit)
+        val added = to.add(fruit)
+        if (added) basket.get(fruit)
+        println("Fruit added $added")
         if (terms.size == 1) addSum()
         valid.value = Validator.isValid(terms)
     }
@@ -97,6 +99,7 @@ class Formula () {
         for (i in 0..terms.size - 1) {
             if (terms[i] is Quantity) {
                 removed = (terms[i] as Quantity).remove(fruit)
+                println("Fruit $fruit removed from $i $removed")
                 if (removed) {
                     basket.putBack(fruit)
                     break
