@@ -30,9 +30,10 @@ class Quantity : Term() {
         fruits.add(fruit)
         updateFruits()
     }
-    fun remove(fruit: Fruit) {
-        fruits.remove(fruit)
+    fun remove(fruit: Fruit): Boolean {
+        val removed = fruits.remove(fruit)
         updateFruits()
+        return removed
     }
     private fun updateFruits() {
         if (isFull()) filter.value = ColorFilter.tint(Color.Transparent)

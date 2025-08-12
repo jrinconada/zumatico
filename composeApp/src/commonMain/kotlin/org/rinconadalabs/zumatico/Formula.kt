@@ -3,7 +3,6 @@ package org.rinconadalabs.zumatico
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -37,7 +35,6 @@ class Formula () {
             }
         }
         onRemoved(fruit)
-        basket.put(fruit)
     }
 
     fun onAdded(fruit: Fruit, to: Quantity) {
@@ -95,15 +92,36 @@ class Formula () {
         }
     }
 
-    fun onRemoved(fruit: Fruit) {
-        terms.forEach { quantity -> if (quantity is Quantity) quantity.remove(fruit) }
+    fun remove(fruit: Fruit) {
+        var removed = false
+        for (i in 0..terms.size - 1) {
+            if (terms[i] is Quantity) {
+                removed = (terms[i] as Quantity).remove(fruit)
+                if (removed) {
+                    basket.putBack(fruit)
+                    break
+                }
+            }
+        }
+        println("Fruit removed $removed")
+        if (!removed) {
+            basket.release(fruit)
+        }
+    }
+
+    fun updateFormulaAfterFruitRemoved() {
         if (terms.filterIsInstance<Quantity>().all { it.isEmpty() }) {
             terms.clear()
             terms.add(Quantity())
+
         } else {
             removeConsecutiveEmptyEqual()
         }
         valid.value = Validator.isValid(terms)
+    }
+    fun onRemoved(fruit: Fruit) {
+        remove(fruit)
+        updateFormulaAfterFruitRemoved()
     }
     @Composable
     fun Draw() {
