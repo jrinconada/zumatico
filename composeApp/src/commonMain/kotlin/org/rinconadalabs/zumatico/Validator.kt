@@ -13,6 +13,7 @@ import org.rinconadalabs.zumatico.Symbol.Symbols.*
 class Validator {
     companion object {
         fun isValid(terms: SnapshotStateList<Term>): Boolean {
+            if (terms.size < 3) return false
             var formula = toList(terms)
             formula = operate(formula, true)
             formula = operate(formula, false)
@@ -66,7 +67,7 @@ class Validator {
                     Lower.resource.hashCode() -> formula[i - 1] < formula[i + 1]
                     Equal.resource.hashCode() -> formula[i - 1] == formula[i + 1]
                     Greater.resource.hashCode() -> formula[i - 1] > formula[i + 1]
-                    else -> true
+                    else -> true // Quantity
                 }
                 if (!valid) return false
             }
