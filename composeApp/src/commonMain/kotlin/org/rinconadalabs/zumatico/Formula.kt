@@ -28,16 +28,17 @@ class Formula () {
             if (term is Quantity) {
                 term.bounds?.let { targetBounds ->
                     if (bounds.overlaps(targetBounds) && !term.isFull()) {
-                        onAdded(fruit, term)
+                        remove(fruit, true)
+                        onDraggedInside(fruit, term)
                         return
                     }
                 }
             }
         }
-        onRemoved(fruit)
+        onDraggedOutside(fruit)
     }
 
-    fun onAdded(fruit: Fruit, to: Quantity) {
+    fun onDraggedInside(fruit: Fruit, to: Quantity) {
         val added = to.add(fruit)
         if (added) basket.get(fruit)
         if (terms.size == 1) addSum()
@@ -92,18 +93,18 @@ class Formula () {
         }
     }
 
-    fun remove(fruit: Fruit) {
-        var removed = false
+    fun remove(fruit: Fruit, toAnotherQuantity: Boolean = false) {
+        var fruitWasInQuantity = false
         for (i in 0..terms.size - 1) {
             if (terms[i] is Quantity) {
-                removed = (terms[i] as Quantity).remove(fruit)
-                if (removed) {
-                    basket.putBack(fruit)
+                fruitWasInQuantity = (terms[i] as Quantity).remove(fruit)
+                if (fruitWasInQuantity) {
+                    if (!toAnotherQuantity) basket.putBack(fruit)
                     break
                 }
             }
         }
-        if (!removed) {
+        if (!fruitWasInQuantity) {
             basket.release(fruit)
         }
     }
@@ -118,7 +119,7 @@ class Formula () {
         }
         valid.value = Validator.isValid(terms)
     }
-    fun onRemoved(fruit: Fruit) {
+    fun onDraggedOutside(fruit: Fruit) {
         remove(fruit)
         updateFormulaAfterFruitRemoved()
     }
