@@ -20,6 +20,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import org.jetbrains.compose.resources.painterResource
@@ -50,13 +51,6 @@ class Fruit(val positionInBasket: Offset, val dragStopped: (Fruit, Rect) -> Unit
         relativePosition = getRelativeOffset()
     }
 
-    private fun randomPosition() : Offset {
-        val range = 30
-        val x = (-range..range).random()
-        val y = (-range..range).random()
-        return Offset(x.toFloat(), y.toFloat())
-    }
-
     private fun getAbsolutePosition(): Offset {
         return relativePosition + origin - positionInBasket
     }
@@ -68,6 +62,7 @@ class Fruit(val positionInBasket: Offset, val dragStopped: (Fruit, Rect) -> Unit
 
     @Composable
     fun Draw(height: Float) {
+        val density = LocalDensity.current.density
         val moveAnimation by animateOffsetAsState(targetValue = relativePosition, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
         val scaleAnimation by animateFloatAsState(targetValue = scale, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
         var isDragging by remember { mutableStateOf(false) }
@@ -92,12 +87,12 @@ class Fruit(val positionInBasket: Offset, val dragStopped: (Fruit, Rect) -> Unit
                 .fillMaxHeight(fraction = scaleAnimation)
                 .onSizeChanged { newSize ->
                     size = newSize
-                    origin = Offset(0f, height - size.height)
+                    origin = Offset(0f, height * density - size.height)
                     relativePosition = getRelativeOffset()
                 }
                 .onGloballyPositioned { coordinates ->
                     size = coordinates.size
-                    origin = Offset(0f, height - size.height)
+                    origin = Offset(0f, height * density - size.height )
                 }
                 .pointerInput(Unit) {
                     detectDragGestures(
